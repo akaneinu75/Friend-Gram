@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ | Friend Gram</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <a href="index.html">Friend Gram</a>
+</header>
+
+<nav>
+  <a href="index.html">ホーム</a>
+  <a href="terms.html">利用規約</a>
+  <a href="privacy.html">プライバシーポリシー</a>
+  <a href="contact.html" class="active">お問い合わせ</a>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h2>お問い合わせ</h2>
+
+    <p>Friend Gramに関するご質問・不具合報告・ご意見はこちらからお送りください。<br>
+    通常2〜3営業日以内にご返信いたします。</p>
+
+    <!-- Google Forms や Formspree に差し替えることを推奨 -->
+    <!-- 以下はサンプルフォーム（静的サイトのためそのままでは送信されません） -->
+
+    <form action="https://formspree.io/f/xxxxxxxx" method="POST" style="margin-top: 28px;">
+      <div class="form-group">
+        <label for="name">お名前</label>
+        <input type="text" id="name" name="name" placeholder="山田 太郎" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">メールアドレス</label>
+        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="category">お問い合わせ種別</label>
+        <select id="category" name="category" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:15px;font-family:inherit;background:#fafafa;">
+          <option value="bug">不具合・バグ報告</option>
+          <option value="feature">機能のご要望</option>
+          <option value="privacy">プライバシーに関するご質問</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="message">お問い合わせ内容</label>
+        <textarea id="message" name="message" placeholder="詳細をご記入ください" required></textarea>
+      </div>
+
+      <button type="submit" class="btn">送信する</button>
+    </form>
+
+    <p style="margin-top:28px;font-size:14px;color:#888;">
+      ※ フォームをご利用いただけない場合は、メールでも受け付けております。<br>
+      <!-- メールアドレスをここに記入してください -->
+      📧 <a href="mailto:your-email@example.com">your-email@example.com</a>
+    </p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 Friend Gram
+</footer>
+
+</body>
+</html>
