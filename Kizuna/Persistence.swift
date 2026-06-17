@@ -1,10 +1,3 @@
-//
-//  Persistence.swift
-//  Kizuna
-//
-//  Created by Akane on 2026/06/04.
-//
-
 import CoreData
 
 struct PersistenceController {
@@ -13,45 +6,48 @@ struct PersistenceController {
     @MainActor
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
+        let ctx = result.container.viewContext
+        let p = Person(context: ctx)
+        p.id = UUID()
+        p.name = "プレビュー"
+        p.positionX = 0.5
+        p.positionY = 0.5
+        p.createdAt = Date()
+        try? ctx.save()
         return result
     }()
 
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "Kizuna")
+        let c = NSPersistentContainer(name: "Kizuna")
+        #if DEBUG
+        let entityNames = c.managedObjectModel.entitiesByName.keys.sorted()
+        assert(!entityNames.isEmpty, "Core Data model is empty — Kizuna.xcdatamodeld がバンドルに含まれていません。Xcode でターゲットメンバーシップを確認してください。")
+        print("[CoreData] loaded entities: \(entityNames)")
+        #endif
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            c.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+        c.loadPersistentStores { description, error in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
+                #if DEBUG
+                // スキーマ変更時に古いストアを削除して再作成する
+                if let storeURL = description.url {
+                    try? c.persistentStoreCoordinator
+                        .destroyPersistentStore(at: storeURL, type: .sqlite, options: nil)
+                }
+                c.loadPersistentStores { _, retryError in
+                    if let retryError = retryError as NSError? {
+                        fatalError("Unresolved error \(retryError), \(retryError.userInfo)")
+                    }
+                }
+                #else
                 fatalError("Unresolved error \(error), \(error.userInfo)")
+                #endif
             }
-        })
-        container.viewContext.automaticallyMergesChangesFromParent = true
+        }
+        c.viewContext.automaticallyMergesChangesFromParent = true
+        container = c
     }
 }

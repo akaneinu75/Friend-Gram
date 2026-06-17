@@ -1,9 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
-        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    <entity name="Person" representedClassName="Person" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="photoData" optional="YES" attributeType="Binary"/>
+        <attribute name="birthday" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="characteristics" optional="YES" attributeType="String"/>
+        <attribute name="positionX" optional="NO" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
+        <attribute name="positionY" optional="NO" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
+        <attribute name="createdAt" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="quizAttemptCount" optional="NO" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="quizCorrectCount" optional="NO" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="affiliations" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Affiliation" inverseName="members" inverseEntity="Affiliation"/>
+        <relationship name="relationshipsAsA" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Relationship" inverseName="personA" inverseEntity="Relationship"/>
+        <relationship name="relationshipsAsB" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Relationship" inverseName="personB" inverseEntity="Relationship"/>
+    </entity>
+    <entity name="Affiliation" representedClassName="Affiliation" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="NO" attributeType="String"/>
+        <attribute name="colorHex" optional="NO" attributeType="String" defaultValueString="#3498DB"/>
+        <relationship name="members" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Person" inverseName="affiliations" inverseEntity="Person"/>
+    </entity>
+    <entity name="Relationship" representedClassName="Relationship" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="label" optional="YES" attributeType="String"/>
+        <attribute name="level" optional="NO" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="YES"/>
+        <attribute name="arrowDirection" optional="NO" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="personA" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="Person" inverseName="relationshipsAsA" inverseEntity="Person"/>
+        <relationship name="personB" optional="NO" maxCount="1" deletionRule="Nullify" destinationEntity="Person" inverseName="relationshipsAsB" inverseEntity="Person"/>
     </entity>
     <elements>
-        <element name="Item" positionX="-63" positionY="-18" width="128" height="44"/>
+        <element name="Person" positionX="0" positionY="0" width="128" height="194"/>
+        <element name="Affiliation" positionX="200" positionY="0" width="128" height="88"/>
+        <element name="Relationship" positionX="0" positionY="250" width="128" height="118"/>
     </elements>
 </model>
