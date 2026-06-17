@@ -29,6 +29,10 @@ struct PersistenceController {
         if inMemory {
             c.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
+        if let desc = c.persistentStoreDescriptions.first {
+            desc.shouldMigrateStoreAutomatically = true
+            desc.shouldInferMappingModelAutomatically = true
+        }
         c.loadPersistentStores { description, error in
             if let error = error as NSError? {
                 #if DEBUG

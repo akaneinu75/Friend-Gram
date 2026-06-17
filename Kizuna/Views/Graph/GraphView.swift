@@ -3,11 +3,24 @@ import CoreData
 import StoreKit
 
 struct GraphView: View {
+    let graph: Graph
+
     @Environment(\.managedObjectContext) private var ctx
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)])
-    private var persons: FetchedResults<Person>
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)])
-    private var relationships: FetchedResults<Relationship>
+    @EnvironmentObject private var graphManager: ActiveGraphManager
+    @FetchRequest private var persons: FetchedResults<Person>
+    @FetchRequest private var relationships: FetchedResults<Relationship>
+
+    init(graph: Graph) {
+        self.graph = graph
+        _persons = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)],
+            predicate: NSPredicate(format: "graph == %@", graph)
+        )
+        _relationships = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)],
+            predicate: NSPredicate(format: "personA.graph == %@", graph)
+        )
+    }
 
     @StateObject private var vm = GraphViewModel()
 
@@ -292,6 +305,7 @@ struct GraphView: View {
                         p.positionX = 0.5
                         p.positionY = 0.5
                         p.name = name
+                        p.graph = graph
                         try? ctx.save()
                         hasCompletedTutorial = true
                         showTutorial = false
@@ -312,6 +326,8 @@ struct GraphView: View {
             }
             .sheet(isPresented: $showSettings) {
                 SettingsSheet()
+                    .environment(\.managedObjectContext, ctx)
+                    .environmentObject(graphManager)
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -574,6 +590,10 @@ private struct SearchResultRow: View {
 }
 
 #Preview {
-    GraphView()
-        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let ctx = PersistenceController.preview.container.viewContext
+    let g = Graph(context: ctx)
+    g.id = UUID(); g.name = "Preview"; g.createdAt = Date()
+    return GraphView(graph: g)
+        .environment(\.managedObjectContext, ctx)
+        .environmentObject(ActiveGraphManager(ctx: ctx))
 }

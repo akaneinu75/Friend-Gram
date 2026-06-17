@@ -8,10 +8,22 @@ enum PersonSortOrder: String, CaseIterable {
 }
 
 struct PersonListView: View {
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)])
-    private var persons: FetchedResults<Person>
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)])
-    private var relationships: FetchedResults<Relationship>
+    let graph: Graph
+
+    @FetchRequest private var persons: FetchedResults<Person>
+    @FetchRequest private var relationships: FetchedResults<Relationship>
+
+    init(graph: Graph) {
+        self.graph = graph
+        _persons = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)],
+            predicate: NSPredicate(format: "graph == %@", graph)
+        )
+        _relationships = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)],
+            predicate: NSPredicate(format: "personA.graph == %@", graph)
+        )
+    }
 
     @State private var searchText = ""
     @State private var sortOrder: PersonSortOrder = .affiliation

@@ -2,15 +2,31 @@ import SwiftUI
 import CoreData
 
 struct MemoryQuizView: View {
+    let graph: Graph
+
     @Environment(\.managedObjectContext) private var ctx
     @StateObject private var viewModel = MemoryQuizViewModel()
 
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)])
-    private var persons: FetchedResults<Person>
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Affiliation.name, ascending: true)])
-    private var affiliations: FetchedResults<Affiliation>
-    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)])
-    private var relationships: FetchedResults<Relationship>
+    @FetchRequest private var persons: FetchedResults<Person>
+    @FetchRequest private var affiliations: FetchedResults<Affiliation>
+    @FetchRequest private var relationships: FetchedResults<Relationship>
+
+    init(graph: Graph) {
+        self.graph = graph
+        let graphPred = NSPredicate(format: "graph == %@", graph)
+        _persons = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Person.createdAt, ascending: true)],
+            predicate: graphPred
+        )
+        _affiliations = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Affiliation.name, ascending: true)],
+            predicate: graphPred
+        )
+        _relationships = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Relationship.createdAt, ascending: true)],
+            predicate: NSPredicate(format: "personA.graph == %@", graph)
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -435,6 +451,9 @@ private struct QuizResultView: View {
 
 #Preview {
     let ctx = PersistenceController.preview.container.viewContext
-    return MemoryQuizView()
+    let g = Graph(context: ctx)
+    g.id = UUID(); g.name = "Preview"; g.createdAt = Date()
+    return MemoryQuizView(graph: g)
         .environment(\.managedObjectContext, ctx)
+        .environmentObject(ActiveGraphManager(ctx: ctx))
 }

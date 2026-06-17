@@ -9,8 +9,14 @@ struct PersonEditView: View {
 
     @Environment(\.managedObjectContext) private var ctx
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var graphManager: ActiveGraphManager
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Affiliation.name, ascending: true)])
-    private var affiliations: FetchedResults<Affiliation>
+    private var allAffiliations: FetchedResults<Affiliation>
+
+    private var affiliations: [Affiliation] {
+        guard let g = graphManager.activeGraph else { return Array(allAffiliations) }
+        return allAffiliations.filter { $0.graph?.objectID == g.objectID }
+    }
 
     @State private var name = ""
     @State private var birthday: Date = {
@@ -185,6 +191,7 @@ struct PersonEditView: View {
             let pos = initialPosition ?? CGPoint(x: 0.5, y: 0.5)
             p.positionX = pos.x
             p.positionY = pos.y
+            p.graph = graphManager.activeGraph
         }
         p.name = name.trimmingCharacters(in: .whitespaces)
         p.characteristics = characteristics
@@ -204,6 +211,7 @@ struct AffiliationCreateSheet: View {
 
     @Environment(\.managedObjectContext) private var ctx
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var graphManager: ActiveGraphManager
 
     @State private var affName = ""
     @State private var affColor = Color.blue
@@ -273,6 +281,7 @@ struct AffiliationCreateSheet: View {
             aff.id = UUID()
             aff.name = trimmed
             aff.colorHex = affColor.toHex()
+            aff.graph = graphManager.activeGraph
             try? ctx.save()
             onCreated(aff)
         }
